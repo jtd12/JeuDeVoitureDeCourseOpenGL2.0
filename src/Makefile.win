@@ -1,0 +1,67 @@
+# Project: Projet1
+# Makefile created by Dev-C++ 5.11
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+OBJ      = main.o gameSetup.o common/objloader.o common/skybox.o common/car.o common/decor.o common/camera.o common/playerCam.o common/water.o common/texture.o common/carAI.o common/AllCars.o common/particuleSystem.o common/sound.o
+LINKOBJ  = main.o gameSetup.o common/objloader.o common/skybox.o common/car.o common/decor.o common/camera.o common/playerCam.o common/water.o common/texture.o common/carAI.o common/AllCars.o common/particuleSystem.o common/sound.o
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib32" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib32" -static-libgcc -lwinmm -lopengl32 -lGLU32 "C:/library/OpenAL 1.1 SDK/libs/Win32/OpenAL32.lib" C:/library/mathsutils/lib/vector.a C:/library/mathsutils/lib/collision.a C:/library/mathsutils/lib/collisionPlane.a C:/library/mathsutils/lib/collisionSphere.a C:/library/freeglut/lib/freeglut.lib -m32
+INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
+CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
+BIN      = Projet1.exe
+CXXFLAGS = $(CXXINCS) -m32
+CFLAGS   = $(INCS) -m32
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+main.o: main.cpp
+	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+
+gameSetup.o: gameSetup.cpp
+	$(CPP) -c gameSetup.cpp -o gameSetup.o $(CXXFLAGS)
+
+common/objloader.o: common/objloader.cpp
+	$(CPP) -c common/objloader.cpp -o common/objloader.o $(CXXFLAGS)
+
+common/skybox.o: common/skybox.cpp
+	$(CPP) -c common/skybox.cpp -o common/skybox.o $(CXXFLAGS)
+
+common/car.o: common/car.cpp
+	$(CPP) -c common/car.cpp -o common/car.o $(CXXFLAGS)
+
+common/decor.o: common/decor.cpp
+	$(CPP) -c common/decor.cpp -o common/decor.o $(CXXFLAGS)
+
+common/camera.o: common/camera.cpp
+	$(CPP) -c common/camera.cpp -o common/camera.o $(CXXFLAGS)
+
+common/playerCam.o: common/playerCam.cpp
+	$(CPP) -c common/playerCam.cpp -o common/playerCam.o $(CXXFLAGS)
+
+common/water.o: common/water.cpp
+	$(CPP) -c common/water.cpp -o common/water.o $(CXXFLAGS)
+
+common/texture.o: common/texture.cpp
+	$(CPP) -c common/texture.cpp -o common/texture.o $(CXXFLAGS)
+
+common/carAI.o: common/carAI.cpp
+	$(CPP) -c common/carAI.cpp -o common/carAI.o $(CXXFLAGS)
+
+common/AllCars.o: common/AllCars.cpp
+	$(CPP) -c common/AllCars.cpp -o common/AllCars.o $(CXXFLAGS)
+
+common/particuleSystem.o: common/particuleSystem.cpp
+	$(CPP) -c common/particuleSystem.cpp -o common/particuleSystem.o $(CXXFLAGS)
+
+common/sound.o: common/sound.cpp
+	$(CPP) -c common/sound.cpp -o common/sound.o $(CXXFLAGS)
