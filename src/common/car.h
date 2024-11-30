@@ -30,6 +30,23 @@ public:
 		vector3d rot_roue;
 };
 
+class boundingbox
+{
+
+public:
+	
+boundingbox(vector3d pos);
+~boundingbox();
+void update();
+void draw();
+vector3d getLocation();
+void setParent(vector3d parent,float rotationY,int offset);
+void setInFrontOfCamera(const vector3d& cameraPosition, const vector3d& cameraOrientation, float distanceFromCamera);
+
+private:
+	vector3d position;
+	float rot;
+};
 
 class vehicule
 {
@@ -38,7 +55,7 @@ class vehicule
 		~vehicule();
 		void ouvrirPorte1();
 		void ouvrirPorte2();
-		void update();
+		void update(float time);
 		void draw();
 		void update(std::vector<collisionplane>& collplane);
 		void update2(std::vector<collisionplane>& collplane);
@@ -47,6 +64,9 @@ class vehicule
 		void setPosition(vector3d pos);
 		void setLocation(vector3d vec);
 		vector3d getLocation();
+		void resetPoints();
+		void setGravity();
+		void collisionCarAndGround();
 		void setLocationIncX(float y);
 		void setLocationIncZ(float y);
 			void move();
@@ -68,19 +88,24 @@ class vehicule
 		void keyboardUP(char key, int x, int y);
 		void inputSpecial(char key,int x, int y);
 		void inputSpecialUP(char key,int x, int y);
-		void control();
+		void control(float time);
 		void setActif(bool b);
 		bool getActif();
 		void fermerPorte1();
 		void fermerPorte2();
 		int getA();
 		void setA(int A);
+		void drawBoundingbox();
+		void limitSpeed(float s);
 		collisionsphere getCollissionSphere();
 		std::vector<roue *> wheel;
 		objloader *obj;
 		std::vector<particule*> part;
-	
-
+		std::vector<boundingbox*> bb;
+		std::vector<boundingbox*> collidersDetection;
+		void checkPoints(vector3d loc,vector3d loc2);
+		int getPOINTS();
+		void setPoints(int p);
 		
 	private:
 	int car;
@@ -102,7 +127,7 @@ class vehicule
 	float s;
 	float rr,rr2;
 	float force_;
-
+	int points;
 	
 
 };

@@ -1,5 +1,53 @@
 #include"camera.h"
 
+boundingboxCam::boundingboxCam()
+{
+	
+}
+boundingboxCam::boundingboxCam(vector3d pos)
+{
+	position=pos;
+	rot=0.0f;
+}
+
+boundingboxCam::~boundingboxCam()
+{
+	
+}
+
+void boundingboxCam::update()
+{
+
+
+}
+
+void boundingboxCam::draw()
+{
+	glPushMatrix();
+	glTranslated(position.x,position.y,position.z);
+	glRotated(rot,0,0.5,0);
+	glScaled(1,1,1);
+	glColor3d(0.5,0.4,0.4);
+	glutSolidCube(10);
+	glPopMatrix();
+}
+
+vector3d boundingboxCam::getLocation()
+{
+	return position;
+}
+
+void boundingboxCam::setInFrontOfCamera( vector3d cameraPosition,  vector3d cameraOrientation, float distanceFromCamera) {
+    // Placer le cube à une distance fixe devant la caméra
+    vector3d normalizedCamOrientation = cameraOrientation;
+	normalizedCamOrientation.normalize();
+	position = cameraPosition + normalizedCamOrientation * distanceFromCamera;	
+    // Garder la même orientation que la caméra
+    rot = atan2(cameraOrientation.z, cameraOrientation.x); // Met à jour l'angle Y du cube pour correspondre à la caméra
+    
+}
+
+
 camera::camera()
 {
 		
@@ -16,17 +64,63 @@ camera::camera()
 	left=0;
 	right=0;
 	actif=false;
+	
+	bb=new boundingboxCam(vector3d(180,0,0));
+//	bb.push_back(new boundingboxCam(vector3d(-140,0,0)));
+	
+	collidersDetection.push_back(new boundingboxCam(vector3d(-500,50,1000)));
+	collidersDetection.push_back(new boundingboxCam(vector3d(6200,50,1000)));
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-500,50,1300)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(4500,50,1300)));
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(4500,50,1300)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(4500,50,1700)));
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(6200,50,-1000)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(6200,50,2500)));
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(5500,50,2200)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-9800,50,2200)));
+	
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(4500,50,1700)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-9200,50,1700)));
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-9800,50,2200)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-9800,50,-100)));
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-9200,50,1700)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-9200,50,200)));
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-9800,50,-300)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-2500,50,-300)));
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-9200,50,100)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-2900,50,100)));
+
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-2900,50,100)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-2900,50,1600)));
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-2500,50,-300)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-2500,50,1100)));
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-2500,50,1100)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-500,50,1100)));
+	
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-2900,50,1300)));
+	collidersDetection.push_back(new boundingboxCam  (vector3d(-500,50,1300)));
 }
 camera::~camera()
 {
-	
+	delete bb;
 }
 void camera::moveCamera(float dir)
 {
 	float rad=(camYaw+dir)*M_PI/180.0;
 
-	loc.x-=sin(rad)*movevel;
-	loc.z-=cos(rad)*movevel;
+	loc.x-=sin(rad)*movevel*speed;
+	loc.z-=cos(rad)*movevel*speed;
 
 
 }
@@ -70,12 +164,51 @@ if(mi)
 	}
 	
 }
+
+void camera::collisionCameraAndGround()
+{
+	if(getLocation().x>-2500 && getLocation().x<9000 && getLocation().z>1000 && getLocation().z<1300 && getLocation().y<70)
+	{
+		setLocation(vector3d(getLocation().x,70,getLocation().z));
+	}
+	else
+	{
+	   if(getLocation().y<110)
+		setLocation(vector3d(getLocation().x,110,getLocation().z));
+	}
+}
+
+
+void camera::updateCollision()
+{
+	float radPitch = camPitch * (M_PI / 180.0f);
+	float radYaw = camYaw * (M_PI / 180.0f);
+	
+	float dirX = cos(radPitch) * sin(radYaw);
+	float dirY = sin(radPitch);
+	float dirZ = cos(radPitch) * cos(radYaw);
+
+// Direction vector (normalized)
+	vector3d direction(dirX, dirY, dirZ);
+	direction.normalize(); // Ensure the vector is a unit vector
+	vector3d positionInFront = loc + (direction * 50.0f);
+
+	bb->setInFrontOfCamera(getLocation(), direction , 50.0f);
+}
+
+void camera::drawCollision()
+{
+	bb->draw();
+}
+
 void camera::update()
 {
 	glRotated(-camPitch,1,0,0);
 	glRotated(-camYaw,0,1,0);
 	glTranslated(-loc.x,-loc.y,-loc.z);
 }
+
+
 
 void camera::setLocation(vector3d l)
 {
@@ -203,6 +336,11 @@ void camera::setSpeed(float mv,float mov)
 {
 	movevel=mv;
 	mousevel=mov;
+}
+
+void camera::setSpeed(float s)
+{
+	speed=s;
 }
 
 bool camera::isMoved()

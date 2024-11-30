@@ -5,10 +5,30 @@
 #include"C:\library\mathsutils\include\collisionsphere.h"
 #include"C:\library\mathsutils\include\collision.h"
 #include<vector>
-#include <gl/gl.h>
+#include<gl/gl.h>
 #include<gl/glu.h>
 #include<stdio.h>
 #include"C:\library\freeglut\include\GL\freeglut.h"
+
+
+class boundingboxCam
+{
+
+public:
+
+boundingboxCam();	
+boundingboxCam(vector3d pos);
+~boundingboxCam();
+void update();
+void draw();
+vector3d getLocation();
+void setInFrontOfCamera( vector3d cameraPosition,  vector3d cameraOrientation, float distanceFromCamera);
+
+private:
+	vector3d position;
+	float rot;
+};
+
 
 class camera
 {
@@ -19,6 +39,9 @@ class camera
 		void moveCamera(float dir);
 		void moveCameraUp(float dir);
 		void moveLateral(float dir,float x,float y);
+		void collisionCameraAndGround();
+		void updateCollision();
+		void drawCollision();
 		void update();
 		void lockCamera();
 		void setLocation(vector3d l);
@@ -46,7 +69,8 @@ class camera
 		vector3d getVector();
 		float getMovevel();
 		float getMousevel();
-		
+		void setSpeed(float s);
+
 		private:
 			int up,down,left,right;
 			float camYaw;
@@ -58,6 +82,12 @@ class camera
 			int MidX;
 			int MidY;
 			bool actif;
+			float speed;
+			
+		public:
+		boundingboxCam* bb;
+		std::vector<boundingboxCam*> collidersDetection;
+			
 	
 
 };

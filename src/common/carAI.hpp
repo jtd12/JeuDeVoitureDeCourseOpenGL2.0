@@ -55,8 +55,15 @@ class vehiculeAI
 		bool getActif();
 		void fermerPorte1();
 		void fermerPorte2();
+		void resetPoints();
+		void setGravity();
+		void collisionCarAndGround();
+		void limitSpeed(float s);
+		void setNumberPath(int num);
 		int getA();
 		void setA(int A);
+		void checkPoints(vector3d loc,vector3d loc2);
+		int getPOINTS();
 		collisionsphere getCollisionSphere();
 	std::vector<roue *> wheel;
 
@@ -84,6 +91,7 @@ class vehiculeAI
 	float rr,rr2;
 	int nn;
 	int randNumber;
+	int points_;
 	
 };
 

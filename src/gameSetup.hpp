@@ -18,7 +18,7 @@
 #include"C:\library\freeglut\include\GL\freeglut.h"
 #define R 21
 
-
+inline float dist(int x1, int y1, int x2, int y2);
 
 class setup
 {
@@ -35,15 +35,28 @@ class setup
 	void draw();
 	void controlSpecialPassiveKeyboard(int key,int x, int y);
 	void passiveKeyboard(unsigned char key, int x, int y);
-
+	
 	private:
 		
+	void hud(const char * filename);
+	void hud2(const char * filename);
+	void hud3(const char * filename);
+	void hud4(const char* filename);
+	void drawHud();
+	bool linePointDetection(float x1, float y1, float x2, float y2, float px, float py);
+	std::string int2str(int x);
 	void gestionCam();
 	void updateCamera();
-	void changeKey();
 	void cameraFollowCar();
 	void collisionCar();
 	void collisionCarAI();
+	void collisionCarAndWall();
+	void collisionCameraAndWall();
+	void cameraMovement(float speed);
+	void resetCar(bool startFreeCamera);
+	void carMovement(float speed);
+	void drawText(float x, float y, std::string text) ;
+	void collisionCar(vector3d pos,vector3d pos2);
 	void fog();
 	void lighting();
 	objloader *obj;
@@ -62,6 +75,15 @@ class setup
 	float deltaTime;
 	float oldTime;
 	double fps;
+	float rotAiguille;
+	GLuint hudTex,hudTex2,hudTex3,hudTex4;
+	textures texture;
+	float time;
+	bool finishedGame;
+	bool keyV;
+	bool startcameraFollow;
+	bool startFreeCamera;
+		
 
 	
 };

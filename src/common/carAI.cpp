@@ -10,7 +10,7 @@ vehiculeAI::vehiculeAI(unsigned int car_,const char* n,collisionsphere ccs, floa
 		setPosition(vector3d(ccs.center));
 		setSpeed(speed,looks);
 		isground=iscollision=issprint=false;
-		speed=rand() % 55 + 40;
+		speed=rand() % 20 + 8;
 		angle=0;
 		maxSpeed=5.0f;
 		acc=0.01f;
@@ -25,6 +25,7 @@ vehiculeAI::vehiculeAI(unsigned int car_,const char* n,collisionsphere ccs, floa
 		actif=false;
 		nn=0;
 		force_=200;
+		points_=0;
 		for(int i=0;i<4;i++)
 	 		wheel.push_back(new roue("data/vehicule/camionnete_roue.obj"));
 
@@ -118,6 +119,56 @@ vector3d vehiculeAI::getRotation()
 	return  vector3d(a.x,a.y,a.z);
 }
 
+int vehiculeAI::getPOINTS()
+{
+	return points_;
+}
+
+void vehiculeAI::resetPoints()
+{
+	points_=0;
+
+}
+
+void vehiculeAI::setRotation(vector3d rot)
+{
+	a=rot;
+	angle=0.0f;
+}
+
+void vehiculeAI::collisionCarAndGround()
+{
+	if(loc.x>-2500 && loc.x<9000 && loc.z>1000 && loc.z<1300)
+	{
+		loc.y=70;
+	}
+	else
+	{
+		loc.y=110;
+	}
+}
+
+void vehiculeAI::setGravity()
+{
+	loc.y-=0.2f;
+	collisionCarAndGround();
+}
+
+void vehiculeAI::limitSpeed(float s)
+{
+	speed=s;
+	}	
+	
+void vehiculeAI::checkPoints(vector3d loc,vector3d loc2)
+{
+	float dist=sqrt(loc2.x-loc.x)*(loc2.x-loc.x)+(loc2.y-loc.y)*(loc2.y-loc.y)+(loc2.z-loc.z)*(loc2.z-loc.z);
+	
+	if(dist<50000)
+	{
+		points_+=5;
+	}
+}
+
 void vehiculeAI::draw()
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -202,4 +253,9 @@ void vehiculeAI::findTarget()
     float beta = a.y-atan2(-ty+loc.z,tx-loc.x);
     if (sin(beta)<0) a.y+=0.005*speed; else a.y-=0.005*speed;
     if ((loc.x-tx)*(loc.x-tx)+(loc.z-ty)*(loc.z-ty)<250*250) nn=(nn+1)%num;
+   }
+   
+   void vehiculeAI::setNumberPath(int num)
+   {
+   	nn=num;
    }

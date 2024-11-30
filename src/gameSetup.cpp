@@ -17,25 +17,21 @@ obj=new objloader();
 unsigned int map=obj->load("data/decor/decor.obj",NULL);
 unsigned int map2=obj->load("data/decor/collision.obj",&mapcp);
 unsigned int map3=obj->load("data/decor/decor2.obj",NULL);
-unsigned int map6=obj->load("data/decor/collision2.obj",&mapcp2);
-unsigned int map7=obj->load("data/decor/collision3.obj",&mapcp3);
 unsigned int map8=obj->load("data/decor/engrenage.obj",NULL);
 unsigned int map9=obj->load("data/decor/decor3.obj",NULL);
-unsigned int map10=obj->load("data/decor/collision4.obj",&mapcp4);
+
 
 levels.push_back(new decor("name",map,mapcp,mapsp));
 levels.push_back(new decor("name",map2,mapcp,mapsp));
 levels.push_back(new decor("name",map3,mapcp,mapsp));
 //levels.push_back(new decor("name",map3_2,mapcp4,mapsp));
-levels.push_back(new decor("name",map6,mapcp2,mapsp));
-levels.push_back(new decor("name",map7,mapcp3,mapsp));
 levels.push_back(new decor("name",map8,mapcp,mapsp));
 levels.push_back(new decor("name",map9,mapcp,mapsp));
-levels.push_back(new decor("name",map10,mapcp4,mapsp));
+
 
 
 sky=new skybox();
-player=new playerCam("player1",collisionsphere(vector3d(2180,500.0,1160),75.0),1.2,30.0,0.5);
+player=new playerCam("player1",collisionsphere(vector3d(-500,250,1260),75.0),1.2,5.0,0.5);
 step=0;
 step_cam_follow=0;
 std::vector<unsigned int> anim;
@@ -73,8 +69,16 @@ sound1=audio->loadSound("data/audio/vehicule.wav");
 PlaySound("data/audio/background.wav", NULL, SND_LOOP |SND_ASYNC);
 
 lighting();
-
-
+hudTex=0;
+hudTex2=0;
+hudTex3=0;
+hudTex4=0;
+rotAiguille=0;
+time=80;
+finishedGame=false;
+keyV=false;
+startcameraFollow=false;
+startFreeCamera=true;
 }
 
 
@@ -114,9 +118,9 @@ void setup::keyboard(unsigned char key, int x, int y)
 		break;
 		
 		case 'v':
-		case 'V': 
-	
+		keyV=true;
 		glutPostRedisplay();
+		case 'V': 
 		break;
 		
 		case 'b':
@@ -135,9 +139,6 @@ void setup::keyboard(unsigned char key, int x, int y)
 		case 'm':
 		case 'M':
 			
-			step++;
-			if(step>5)
-			 step=0;
 			glutPostRedisplay();
 			break;
 		     
@@ -206,6 +207,74 @@ void setup::controlSpecialPassiveKeyboard(int key,int x, int y)
 	
 }
 
+void setup::resetCar(bool startFreeCamera)
+{
+	
+	
+	if(allCars[0]->car->getPOINTS()>=15000)
+	{
+		finishedGame=true;
+	}
+
+	
+   for(int w=1;w<allCars.size();w++)
+	for(int i=0;i<allCars[w]->carAI.size();i++)
+	{
+	if(allCars[w]->carAI[i]->getPOINTS()>=15000)
+	{
+		finishedGame=true;
+
+	}
+ }
+ 
+
+ 
+ 
+ if(keyV && time>0 && finishedGame)
+ {
+ 	finishedGame=false;
+ }
+	
+    if( !finishedGame)
+		 time-=0.1f;
+		
+	 else if(finishedGame)
+ {
+
+   time=80;
+   player->cam.setLocation(vector3d(-500,250,1260));
+   allCars[0]->car->resetPoints();
+   allCars[0]->car->setLocation(vector3d(-2400,180,1280));
+   allCars[0]->car->limitSpeed(0.0f);
+   allCars[0]->car->setRotation(vector3d(0,0,0));
+   //allCars[0]->car->placementRoues();
+   allCars[0]->car->setGravity();
+   
+   
+   for(int w=1;w<allCars.size();w++)
+	for(int i=0;i<allCars[w]->carAI.size();i++)
+	{
+      allCars[w]->carAI[i]->resetPoints();
+      allCars[1]->carAI[i]->setLocation(vector3d(-450,180,1200));
+      allCars[2]->carAI[i]->setLocation(vector3d(-850,180,1200));
+      allCars[3]->carAI[i]->setLocation(vector3d(-100,180,1200));
+      allCars[4]->carAI[i]->setLocation(vector3d(550,180,1200));
+      allCars[5]->carAI[i]->setLocation(vector3d(1200,180,1200));
+	  allCars[6]->carAI[i]->setLocation(vector3d(-1000,180,1200));
+      allCars[w]->carAI[i]->setRotation(vector3d(0,0,0));
+    // allCars[w]->carAI[i]->limitSpeed(0.0f);
+      allCars[w]->carAI[i]->setNumberPath(0);
+     // allCars[w]->carAI[i]->placeRoues(startFreeCamera);
+      allCars[w]->carAI[i]->setGravity();
+
+  	}
+  	
+  	
+	}
+
+}
+
+
 void setup::gestionCam()
 {
 	if(player->cam.getUP())
@@ -236,21 +305,6 @@ void setup::gestionCam()
 	 player->cam.moveCamera(90);
 }
 
-}
-
-void setup::changeKey()
-{
- 	if(step<=2)
-{
-
-	player->cam.setActif(true);
-	allCars[0]->car->setActif(false);
-}
-else
-{
-	player->cam.setActif(false);
-	allCars[0]->car->setActif(true);
-}
 
 }
 
@@ -278,7 +332,7 @@ void setup::cameraFollowCar()
 }
 	if(allCars[0]->car->getSpeed()==0.0f)
 	{
-	vector3d camPos=vector3d(allCars[0]->car->getLocation().x+cos(allCars[0]->car->getRotation().y*M_PI/180.0f)*-550,390.5,allCars[0]->car->getLocation().z-sin(allCars[0]->car->getRotation().y*M_PI/180.0f)*-550);
+	vector3d camPos=vector3d(allCars[0]->car->getLocation().x+cos(allCars[0]->car->getRotation().y*M_PI/180.0f)*-550,590.5,allCars[0]->car->getLocation().z-sin(allCars[0]->car->getRotation().y*M_PI/180.0f)*-550);
 	vector3d target=allCars[0]->car->getLocation();
 	vector3d camUp=vector3d(0,1,0);
 	gluLookAt(camPos.x,camPos.y,camPos.z,target.x,target.y,target.z,camUp.x,camUp.y,camUp.z);	
@@ -300,10 +354,8 @@ glFogf(GL_FOG_DENSITY, fog_variation) ;
 glFogf(GL_FOG_START, 80.0) ;
 glFogf(GL_FOG_END, 8500.0) ;
 
-fog_variation=fps/90000.0f;
+fog_variation=0.0002f;
 
-if(fog_variation>.01f)
-  fog_variation=fps/90000.0f;
 
 }
 
@@ -332,7 +384,7 @@ void setup::lighting()
 
 void setup::updateCamera()
 {
-	if(player->cam.getActif() && allCars[0]->car->getActif()==false)
+	if(time>0)
 	{
 	
 	 player->cam.update();
@@ -341,9 +393,748 @@ void setup::updateCamera()
 	else
 	{
 	   cameraFollowCar();
-	   allCars[0]->car->update();
+	   allCars[0]->car->update(time);
 	}
 }
+
+
+void setup:: drawText(float x, float y, std::string text) {
+    glRasterPos2f(x, y);
+    glutBitmapString(GLUT_BITMAP_8_BY_13, (const unsigned char*)text.c_str());
+}
+
+
+void setup::hud(const char* filename)
+{
+	glEnable(GL_TEXTURE_2D);
+	if(hudTex==0)
+	 hudTex=texture.loadBMP_custom(filename);
+	glPushMatrix();
+	glTranslated(-0.68,-0.85,0);
+	glScaled(0.2,0.17,0);
+	glBindTexture(GL_TEXTURE_2D,hudTex);
+	glColor3f(1,1,1);
+	glBegin(GL_QUADS);
+	
+glTexCoord2i(0,1);glVertex3i(-1,-1,-1);
+glTexCoord2i(1,1);glVertex3i(+1,-1,-1);
+glTexCoord2i(1,0);glVertex3i(+1,+1,-1); 
+glTexCoord2i(0,0);glVertex3i(-1,+1,-1);
+
+	glEnd();
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
+	
+}
+
+void setup::hud2(const char* filename)
+{
+	glEnable(GL_TEXTURE_2D);
+	if(hudTex2==0)
+	 hudTex2=texture.loadBMP_custom(filename);
+	glPushMatrix();
+	glTranslated(-0.75,-0.9,0);
+	glRotatef(rotAiguille,0,0,0.5);
+	glTranslated(-0.025,0.0,0);
+	glScaled(0.015,0.015,0);
+	glBindTexture(GL_TEXTURE_2D,hudTex2);
+	glColor3f(1,1,1);
+	glBegin(GL_QUADS);
+	
+	glTexCoord2i(0,1);glVertex3i(-1,-1,-1);
+	glTexCoord2i(1,1);glVertex3i(+1,-1,-1);
+	glTexCoord2i(1,0);glVertex3i(+1,+1,-1); 
+	glTexCoord2i(0,0);glVertex3i(-1,+1,-1);
+
+	glEnd();
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
+
+}
+
+void setup::hud3(const char* filename)
+{
+	glEnable(GL_TEXTURE_2D);
+	if(hudTex3==0)
+	 hudTex3=texture.loadBMP_custom(filename);
+	glPushMatrix();
+	glTranslated(-0.5,0.3,0);
+	glScaled(0.2,0.98,0);
+	glBindTexture(GL_TEXTURE_2D,hudTex3);
+	glColor3f(1,1,1);
+	glBegin(GL_QUADS);
+	
+	glTexCoord2i(0,1);glVertex3i(-1,-1,-1);
+	glTexCoord2i(1,1);glVertex3i(+1,-1,-1);
+	glTexCoord2i(1,0);glVertex3i(+1,+1,-1); 
+	glTexCoord2i(0,0);glVertex3i(-1,+1,-1);
+
+	glEnd();
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
+
+}
+
+void setup::hud4(const char* filename)
+{
+	glEnable(GL_TEXTURE_2D);
+	if(hudTex4==0)
+	 hudTex4=texture.loadBMP_custom(filename);
+	glPushMatrix();
+	glTranslated(0.75,-0.15,0);
+	glScaled(0.2,0.55,0);
+	glBindTexture(GL_TEXTURE_2D,hudTex4);
+	glColor3f(1,1,1);
+	glBegin(GL_QUADS);
+	
+	glTexCoord2i(0,1);glVertex3i(-1,-1,-1);
+	glTexCoord2i(1,1);glVertex3i(+1,-1,-1);
+	glTexCoord2i(1,0);glVertex3i(+1,+1,-1); 
+	glTexCoord2i(0,0);glVertex3i(-1,+1,-1);
+
+	glEnd();
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
+
+}
+
+std::string setup::int2str(int x) {
+    // converts int to string
+    std::stringstream ss;
+    ss << x;
+    return ss.str( );
+}
+
+void setup::drawHud()
+{
+
+	    
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(0,0,1,0);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	
+	hud2("data/aiguille.bmp");	
+	hud("data/tableaubord2.bmp");	
+	
+	drawText(-0.6,0.9,"CARPLAYER:");
+	if(allCars[0]->car->getSpeed()>0)
+	 drawText(-0.6,0.8,"VITESSE: "+int2str(allCars[0]->car->getSpeed()*30));
+	else if(allCars[0]->car->getSpeed()<0)
+	 drawText(-0.6,0.8,"VITESSE: "+int2str(allCars[0]->car->getSpeed()*-30)); 
+	else
+	  drawText(-0.6,0.8,"VITESSE: "+int2str(allCars[0]->car->getSpeed())); 
+	  
+	drawText(-0.6,0.7,"POINTS: "+int2str(allCars[0]->car->getPOINTS()));
+	
+	drawText(-0.6,0.5,"CARPLAYERAI:");
+	
+   for(int w=1;w<allCars.size();w++)
+	for(int i=0;i<allCars[w]->carAI.size();i++)
+	{
+	 drawText(-0.6,0.55-(w*0.2),"CARAI: POINTS: "+int2str(allCars[w]->carAI[i]->getPOINTS()));
+	}
+	
+   for(int w=1;w<allCars.size();w++)
+	 for(int i=0;i<allCars[w]->carAI.size();i++)
+	 {
+	  drawText(0.6,0.55-(w*0.2),"VITESSE: "+int2str(allCars[w]->carAI[i]->getSpeed())); 
+	}
+	
+	if(time>0)
+  	{
+	drawText(-0.15,0.3,"START GAME INTO: "+int2str(time));
+	}
+	
+	for(int w=1;w<allCars.size();w++)
+		 for(int i=0;i<allCars[w]->carAI.size();i++)
+		 {
+	if( allCars[0]->car->getPOINTS()>=15000 && allCars[w]->carAI[i]->getPOINTS()<15000)
+	{
+		drawText(0.8,0.4,"YOU WIN!!!! "); 
+	}
+	else
+	{
+	  if( allCars[0]->car->getPOINTS()<15000 && allCars[w]->carAI[i]->getPOINTS()>=15000)
+	  {
+			drawText(0.8,0.4,"YOU LOSE!!!! "); 
+	  }
+   }
+ }
+	
+	hud3("data/fond_.bmp");
+	hud4("data/fond_.bmp");
+		
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+	
+}
+
+
+void setup::collisionCar(vector3d pos,vector3d pos2)
+{
+	
+	float dist=sqrt((pos.x-pos2.x)*(pos.x-pos2.x) + (pos.z-pos2.z)*(pos.z-pos2.z));
+	
+		 	  if(dist<80)
+		 	  {
+		 	 carMovement(-1.0f);
+		 	 allCars[0]->car->setPoints(1);
+			  }
+		 
+}
+
+void setup::carMovement(float speed)
+{
+	   for(int w=0;w<1;w++)
+	   {
+	      allCars[w]->car->limitSpeed(speed);
+	      allCars[w]->car->setPoints(1);
+	   }
+}
+
+
+
+void setup::cameraMovement(float speed)
+{
+	      
+	  player->cam.setSpeed(speed); 
+	  
+}
+
+
+void setup::collisionCameraAndWall()
+{
+  if(linePointDetection(player->cam.collidersDetection[0]->getLocation().x,
+	player->cam.collidersDetection[0]->getLocation().z,player->cam.collidersDetection[1]->getLocation().x,
+	player->cam.collidersDetection[1]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+	
+	
+	else if(linePointDetection(player->cam.collidersDetection[2]->getLocation().x,
+	player->cam.collidersDetection[2]->getLocation().z,player->cam.collidersDetection[3]->getLocation().x,
+	player->cam.collidersDetection[3]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+	
+	
+	
+	else if(linePointDetection(player->cam.collidersDetection[4]->getLocation().x,
+	player->cam.collidersDetection[4]->getLocation().z,player->cam.collidersDetection[5]->getLocation().x,
+	player->cam.collidersDetection[5]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+	
+	
+	 else if(linePointDetection(player->cam.collidersDetection[6]->getLocation().x,
+	player->cam.collidersDetection[6]->getLocation().z,player->cam.collidersDetection[7]->getLocation().x,
+	player->cam.collidersDetection[7]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+
+	
+	else if(linePointDetection(player->cam.collidersDetection[8]->getLocation().x,
+	player->cam.collidersDetection[8]->getLocation().z,player->cam.collidersDetection[9]->getLocation().x,
+	player->cam.collidersDetection[9]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+
+	
+	else if(linePointDetection(player->cam.collidersDetection[10]->getLocation().x,
+	player->cam.collidersDetection[10]->getLocation().z,player->cam.collidersDetection[11]->getLocation().x,
+	player->cam.collidersDetection[11]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+
+	else if(linePointDetection(player->cam.collidersDetection[12]->getLocation().x,
+	player->cam.collidersDetection[12]->getLocation().z,player->cam.collidersDetection[13]->getLocation().x,
+	player->cam.collidersDetection[13]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+	
+	
+	else if(linePointDetection(player->cam.collidersDetection[14]->getLocation().x,
+	player->cam.collidersDetection[14]->getLocation().z,player->cam.collidersDetection[15]->getLocation().x,
+	player->cam.collidersDetection[15]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+
+	
+	else if(linePointDetection(player->cam.collidersDetection[16]->getLocation().x,
+	player->cam.collidersDetection[16]->getLocation().z,player->cam.collidersDetection[17]->getLocation().x,
+	player->cam.collidersDetection[17]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+
+	
+	
+	else if(linePointDetection(player->cam.collidersDetection[18]->getLocation().x,
+	player->cam.collidersDetection[18]->getLocation().z,player->cam.collidersDetection[19]->getLocation().x,
+	player->cam.collidersDetection[19]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+
+
+	else if(linePointDetection(player->cam.collidersDetection[20]->getLocation().x,
+	player->cam.collidersDetection[20]->getLocation().z,player->cam.collidersDetection[21]->getLocation().x,
+	player->cam.collidersDetection[21]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+
+	
+	else if(linePointDetection(player->cam.collidersDetection[22]->getLocation().x,
+	player->cam.collidersDetection[22]->getLocation().z,player->cam.collidersDetection[23]->getLocation().x,
+	player->cam.collidersDetection[23]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+
+	
+	else if(linePointDetection(player->cam.collidersDetection[24]->getLocation().x,
+	player->cam.collidersDetection[24]->getLocation().z,player->cam.collidersDetection[25]->getLocation().x,
+	player->cam.collidersDetection[25]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+
+	
+	else if(linePointDetection(player->cam.collidersDetection[26]->getLocation().x,
+	player->cam.collidersDetection[26]->getLocation().z,player->cam.collidersDetection[27]->getLocation().x,
+	player->cam.collidersDetection[27]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         cameraMovement(-40.8f);
+
+	}
+	else
+	{
+		   cameraMovement(1.0f);
+	}
+}
+
+
+void setup::collisionCarAndWall()
+{
+	
+ 	
+   for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[0]->getLocation().x,
+	allCars[w]->car->collidersDetection[0]->getLocation().z,allCars[w]->car->collidersDetection[1]->getLocation().x,
+	allCars[w]->car->collidersDetection[1]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         carMovement(-4.0f);
+
+	}
+	
+	  for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[0]->getLocation().x,
+	allCars[w]->car->collidersDetection[0]->getLocation().z,allCars[w]->car->collidersDetection[1]->getLocation().x,
+	allCars[w]->car->collidersDetection[1]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+      carMovement(4.0f);
+
+	}
+	
+
+   for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[2]->getLocation().x,
+	allCars[w]->car->collidersDetection[2]->getLocation().z,allCars[w]->car->collidersDetection[3]->getLocation().x,
+	allCars[w]->car->collidersDetection[3]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+   
+    carMovement(-4.0f);
+      
+
+	}
+	
+	
+   for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[2]->getLocation().x,
+	allCars[w]->car->collidersDetection[2]->getLocation().z,allCars[w]->car->collidersDetection[3]->getLocation().x,
+	allCars[w]->car->collidersDetection[3]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+   
+     carMovement(4.0f);
+      
+
+	}
+
+	for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[4]->getLocation().x,
+	allCars[w]->car->collidersDetection[4]->getLocation().z,allCars[w]->car->collidersDetection[5]->getLocation().x,
+	allCars[w]->car->collidersDetection[5]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+      carMovement(-4.0f);
+       
+
+	}
+	
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[4]->getLocation().x,
+	allCars[w]->car->collidersDetection[4]->getLocation().z,allCars[w]->car->collidersDetection[5]->getLocation().x,
+	allCars[w]->car->collidersDetection[5]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+    	
+     carMovement(4.0f);
+       
+
+	}
+	
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[6]->getLocation().x,
+	allCars[w]->car->collidersDetection[6]->getLocation().z,allCars[w]->car->collidersDetection[7]->getLocation().x,
+	allCars[w]->car->collidersDetection[7]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+      carMovement(-4.0f);
+       
+
+	}
+	
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[6]->getLocation().x,
+	allCars[w]->car->collidersDetection[6]->getLocation().z,allCars[w]->car->collidersDetection[7]->getLocation().x,
+	allCars[w]->car->collidersDetection[7]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+    	
+     carMovement(4.0f);
+       
+
+	}		
+
+
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[8]->getLocation().x,
+	allCars[w]->car->collidersDetection[8]->getLocation().z,allCars[w]->car->collidersDetection[9]->getLocation().x,
+	allCars[w]->car->collidersDetection[9]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+    carMovement(-4.0f);
+       
+
+	}
+	
+		
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[8]->getLocation().x,
+	allCars[w]->car->collidersDetection[8]->getLocation().z,allCars[w]->car->collidersDetection[9]->getLocation().x,
+	allCars[w]->car->collidersDetection[9]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+      carMovement(4.0f);
+       
+
+	}
+	
+
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[10]->getLocation().x,
+	allCars[w]->car->collidersDetection[10]->getLocation().z,allCars[w]->car->collidersDetection[11]->getLocation().x,
+	allCars[w]->car->collidersDetection[11]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+
+   carMovement(-4.0f);
+       
+  
+	}
+	
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[10]->getLocation().x,
+	allCars[w]->car->collidersDetection[10]->getLocation().z,allCars[w]->car->collidersDetection[11]->getLocation().x,
+	allCars[w]->car->collidersDetection[11]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+
+carMovement(4.0f);
+       
+  
+	}
+
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[12]->getLocation().x,
+	allCars[w]->car->collidersDetection[12]->getLocation().z,allCars[w]->car->collidersDetection[13]->getLocation().x,
+	allCars[w]->car->collidersDetection[13]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+      carMovement(-4.0f);
+       
+
+	}
+	
+	
+
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[12]->getLocation().x,
+	allCars[w]->car->collidersDetection[12]->getLocation().z,allCars[w]->car->collidersDetection[13]->getLocation().x,
+	allCars[w]->car->collidersDetection[13]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+      carMovement(4.0f);
+       
+
+	}
+	
+	
+	
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[14]->getLocation().x,
+	allCars[w]->car->collidersDetection[14]->getLocation().z,allCars[w]->car->collidersDetection[15]->getLocation().x,
+	allCars[w]->car->collidersDetection[15]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+ 
+      carMovement(-4.0f);
+       
+      
+	}
+	
+	
+
+	
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[14]->getLocation().x,
+	allCars[w]->car->collidersDetection[14]->getLocation().z,allCars[w]->car->collidersDetection[15]->getLocation().x,
+	allCars[w]->car->collidersDetection[15]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+ 
+      carMovement(4.0f);
+       
+      
+	}
+	
+	
+	
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[16]->getLocation().x,
+	allCars[w]->car->collidersDetection[16]->getLocation().z,allCars[w]->car->collidersDetection[17]->getLocation().x,
+	allCars[w]->car->collidersDetection[17]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+
+      carMovement(-4.0f);
+    
+	}
+	
+		
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[16]->getLocation().x,
+	allCars[w]->car->collidersDetection[16]->getLocation().z,allCars[w]->car->collidersDetection[17]->getLocation().x,
+	allCars[w]->car->collidersDetection[17]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+
+    carMovement(4.0f);
+    
+	}
+		
+	
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[18]->getLocation().x,
+	allCars[w]->car->collidersDetection[18]->getLocation().z,allCars[w]->car->collidersDetection[19]->getLocation().x,
+	allCars[w]->car->collidersDetection[19]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+
+      carMovement(-4.0f);
+       
+
+	}
+	
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[18]->getLocation().x,
+	allCars[w]->car->collidersDetection[18]->getLocation().z,allCars[w]->car->collidersDetection[19]->getLocation().x,
+	allCars[w]->car->collidersDetection[19]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+
+     carMovement(4.0f);
+       
+
+	}
+		
+		
+		
+		
+		
+		//////////////////////////////////
+		
+		
+		
+	
+
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[20]->getLocation().x,
+	allCars[w]->car->collidersDetection[20]->getLocation().z,allCars[w]->car->collidersDetection[21]->getLocation().x,
+	allCars[w]->car->collidersDetection[21]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+  carMovement(-4.0f);
+       
+ 
+	}
+	
+	
+		for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[20]->getLocation().x,
+	allCars[w]->car->collidersDetection[20]->getLocation().z,allCars[w]->car->collidersDetection[21]->getLocation().x,
+	allCars[w]->car->collidersDetection[21]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+      carMovement(4.0f);
+       
+ 
+	}
+
+	
+	
+			for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[22]->getLocation().x,
+	allCars[w]->car->collidersDetection[22]->getLocation().z,allCars[w]->car->collidersDetection[23]->getLocation().x,
+	allCars[w]->car->collidersDetection[23]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+    carMovement(-4.0f);
+
+	}
+	
+	
+			for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[22]->getLocation().x,
+	allCars[w]->car->collidersDetection[22]->getLocation().z,allCars[w]->car->collidersDetection[23]->getLocation().x,
+	allCars[w]->car->collidersDetection[23]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+      carMovement(4.0f);
+
+	}
+	
+	
+	
+	//////////////////////////////////
+	
+	
+	
+	
+	   for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[24]->getLocation().x,
+	allCars[w]->car->collidersDetection[24]->getLocation().z,allCars[w]->car->collidersDetection[25]->getLocation().x,
+	allCars[w]->car->collidersDetection[25]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         carMovement(-4.0f);
+
+	}
+	
+	  for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[24]->getLocation().x,
+	allCars[w]->car->collidersDetection[24]->getLocation().z,allCars[w]->car->collidersDetection[25]->getLocation().x,
+	allCars[w]->car->collidersDetection[25]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+      carMovement(4.0f);
+
+	}
+	
+	
+	   for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[26]->getLocation().x,
+	allCars[w]->car->collidersDetection[26]->getLocation().z,allCars[w]->car->collidersDetection[27]->getLocation().x,
+	allCars[w]->car->collidersDetection[27]->getLocation().z,allCars[w]->car->bb[0]->getLocation().x,allCars[w]->car->bb[0]->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+         carMovement(-4.0f);
+
+	}
+	
+	  for(int w=0;w<1;w++)
+    if(linePointDetection(allCars[w]->car->collidersDetection[26]->getLocation().x,
+	allCars[w]->car->collidersDetection[26]->getLocation().z,allCars[w]->car->collidersDetection[27]->getLocation().x,
+	allCars[w]->car->collidersDetection[27]->getLocation().z,allCars[w]->car->bb[1]->getLocation().x,allCars[w]->car->bb[1]->getLocation().z))
+    {
+    //	allCars[w]->car->setLocationIncZ(15.5f);
+      carMovement(4.0f);
+
+	}
+
+	
+	
+}
+
+
+
+inline float dist(int x1, int y1, int x2, int y2)
+{
+    // Calculating distance
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2) * 1.0);
+}
+
+bool setup:: linePointDetection(float x1, float y1, float x2, float y2, float px, float py) {
+
+  // get distance from the point to the two ends of the line
+  float distX = px - x1;
+  float distY = py - y1;
+
+  float d1 = dist(px,py, x1,y1);
+  float d2 = dist(px,py, x2,y2);
+
+  // get the length of the line
+  float lineLen = dist(x1,y1, x2,y2);
+
+  // since floats are so minutely accurate, add
+  // a little buffer zone that will give collision
+  float buffer = 0.1;    // higher # = less accurate
+
+  // if the two distances are equal to the line's
+  // length, the point is on the line!
+  // note we use the buffer here to give a range,
+  // rather than one #
+  if (d1+d2 >= lineLen-buffer && d1+d2 <= lineLen+buffer) {
+    return true;
+  }
+  return false;
+}
+
 
 void setup::update()
 {
@@ -351,9 +1142,6 @@ void setup::update()
     deltaTime = clock() - oldTime;
 	fps = (1.0 / deltaTime) * 1000;
 	oldTime = clock();
-	
-	audio->setListener(allCars[0]->car->getLocation(),allCars[0]->car->getLocation());
-	audio->playSound(sound1,allCars[0]->car->getLocation(),(allCars[0]->car->getSpeed()/allCars[0]->car->getMaxSpeed())+1);
 
 //	printf("v1: %.2f\n",allCars[1]->carAI[0]->getSpeed());
 //	printf("v2: %.2f\n",allCars[2]->carAI[0]->getSpeed());
@@ -365,12 +1153,37 @@ void setup::update()
 	 car->control();
 	
 	}*/
-
+	
+	resetCar(startFreeCamera);
+	
+	if(startFreeCamera)
+	{
+	collisionCameraAndWall();
+	player->cam.collisionCameraAndGround();
+	player->cam.updateCollision();
+	}
+	
 	ocean->update(295);
 	ressort->update(100);
 	tuyeau->update(100);
 	
+    time-=0.01f;
+    
+    if(time>0)
+    {
+		startcameraFollow=false;
+		startFreeCamera=true;
+	}
 	
+	if(time<=0 && !finishedGame)
+	{
+		
+    time=0.0f;
+    keyV=false;
+    startcameraFollow=true;
+	startFreeCamera=false;
+	audio->setListener(allCars[0]->car->getLocation(),allCars[0]->car->getLocation());
+	audio->playSound(sound1,allCars[0]->car->getLocation(),(allCars[0]->car->getSpeed()/allCars[0]->car->getMaxSpeed())+1);
 	
    for(int w=1;w<allCars.size();w++)
 	for(int i=0;i<allCars[w]->carAI.size();i++)
@@ -379,19 +1192,28 @@ void setup::update()
 	for(int w=1;w<allCars.size();w++)
 	 for(int i=0;i<allCars[w]->carAI.size();i++)
 	 allCars[w]->carAI[i]->update(levels[1]->getCollisionPlanes());
-	 
 	
-		for(int w=1;w<allCars.size();w++)
-	 for(int i=0;i<allCars[w]->carAI.size();i++)
-	 allCars[w]->carAI[i]->update2(levels[7]->getCollisionPlanes());
-	 
-	 
-	 //allCars[w]->carAI[i]->update2(levels[5]->getCollisionPlanes());
     allCars[0]->car->update(levels[1]->getCollisionPlanes());
- 	allCars[0]->car->update2(levels[3]->getCollisionPlanes());
-	allCars[0]->car->update3(levels[4]->getCollisionPlanes());
-	allCars[0]->car->update4(levels[7]->getCollisionPlanes());
-    //player->update(levels[0]->getCollisionPlanes());
+    
+	collisionCarAndWall();
+	
+	  allCars[0]->car->checkPoints(vector3d(4000,50,1100),allCars[0]->car->getLocation());
+	  allCars[0]->car->checkPoints(vector3d(-7000,50,1800),allCars[0]->car->getLocation());
+	  allCars[0]->car->checkPoints(vector3d(-2800,50,-200),allCars[0]->car->getLocation());
+	  allCars[0]->car->checkPoints(vector3d(-600,50,1200),allCars[0]->car->getLocation());
+	  
+   for(int w=1;w<allCars.size();w++)
+	for(int i=0;i<allCars[w]->carAI.size();i++)
+	{
+	  allCars[w]->carAI[i]->checkPoints(vector3d(4000,50,1100),allCars[w]->carAI[i]->getLocation());
+	  allCars[w]->carAI[i]->checkPoints(vector3d(-7000,50,1800),allCars[w]->carAI[i]->getLocation());
+	  allCars[w]->carAI[i]->checkPoints(vector3d(-2800,50,-200),allCars[w]->carAI[i]->getLocation());
+	  allCars[w]->carAI[i]->checkPoints(vector3d(-600,50,1200),allCars[w]->carAI[i]->getLocation());
+	}
+ 	
+	   for(int w=1;w<allCars.size();w++)
+		 for(int i=0;i<allCars[w]->carAI.size();i++)
+	       collisionCar(allCars[0]->car->getLocation(),allCars[w]->carAI[i]->getLocation());
 
 
 	sky->update();
@@ -402,10 +1224,17 @@ void setup::update()
 	allCars[w]->carAI[i]->move();
     allCars[w]->carAI[i]->findTarget();
 	}
-
-	changeKey();
+  }
+	else
+	{
+	for(int w=1;w<allCars.size();w++)
+	 for(int i=0;i<allCars[w]->carAI.size();i++)
+	 allCars[w]->carAI[i]->update(levels[1]->getCollisionPlanes());
 	
-				
+    allCars[0]->car->update(levels[1]->getCollisionPlanes());
+	}
+
+	
 	fog();
 	
 }
@@ -413,8 +1242,16 @@ void setup::update()
 
 void setup::draw()
 {
+	rotAiguille=allCars[0]->car->getSpeed()/-0.25;
 	//glTranslated(0,-10,-100);
 	updateCamera();
+	glPushMatrix();
+	player->cam.drawCollision();
+	glPopMatrix();
+	glPushMatrix();
+	//player->cam.bb[0]->draw();
+	glPopMatrix();
+	
 	//cameraFollowCar();
 	glPushMatrix();
 	ocean->draw();
@@ -437,6 +1274,16 @@ void setup::draw()
 	 for(int i=0;i<allCars[w]->carAI.size();i++)
 	  allCars[w]->carAI[0]->draw();
 	glPopMatrix();
+	glPushMatrix();
 	
+	for(int i=0;i<allCars[0]->car->bb.size();i++)
+	  allCars[0]->car->bb[i]->draw();
+	  
+	for(int i=0;i<allCars[0]->car->collidersDetection.size();i++)
+	  allCars[0]->car->collidersDetection[i]->draw();
+	  
+	glPopMatrix();
+	drawHud();
+
 
 }

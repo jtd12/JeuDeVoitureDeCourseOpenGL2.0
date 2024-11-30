@@ -51,22 +51,61 @@ vector3d roue::getRotation()
 		}
 
 
+boundingbox::boundingbox(vector3d pos)
+{
+	position=pos;
+}
+
+boundingbox::~boundingbox()
+{
+	
+}
+
+void boundingbox::update()
+{
+
+
+}
+
+void boundingbox::draw()
+{
+	glPushMatrix();
+	glTranslated(position.x,position.y,position.z);
+	glRotated(rot,0,0.5,0);
+	glScaled(1,1,1);
+	glColor3d(0.5,0.4,0.4);
+	glutSolidCube(30);
+	glPopMatrix();
+}
+
+vector3d boundingbox::getLocation()
+{
+	return position;
+}
+
+void boundingbox::setParent(vector3d parent,float rotationY,int offset)
+{
+	position=vector3d(parent.x+cos(-rotationY*M_PI/180)*offset,parent.y+2,parent.z+sin(-rotationY*M_PI/180)*offset);
+	rot=rotationY;
+}
+
+
 vehicule::vehicule(const char* n,collisionsphere ccs, float sprints,float normals,float looks)
 {
 		name=n;
 		cs=ccs;
 		sprintspeed=sprints;
 		normalspeed=normals;
-		force.change(0.0,-0.45f,0.0);
+		force.change(0.0,-0.15f,0.0);
 		setPosition(vector3d(cs.center));
 		setSpeed(normalspeed,looks);
 		isground=iscollision=issprint=false;
 		speed=normals;
 		angle=0;
-		maxSpeed=rand() % 95 + 60;
-		acc=1.0f;
-		dec=0.35f;
-		turnSpeed=4.5f;
+		maxSpeed=rand() % 10 + 12;
+		acc=0.04f;
+		dec=0.05f;
+		turnSpeed=2.5f;
 		up=0;
 		down=0;
 		left=0;
@@ -78,12 +117,59 @@ vehicule::vehicule(const char* n,collisionsphere ccs, float sprints,float normal
 	    rr=0.0f;
 	    rr2=0.0f;
 	    force_=200;
+	    points=0;
+	    
+	collidersDetection.push_back(new boundingbox(vector3d(-500,50,1000)));
+	collidersDetection.push_back(new boundingbox(vector3d(6200,50,1000)));
+	
+	collidersDetection.push_back(new boundingbox(vector3d(-500,50,1300)));
+	collidersDetection.push_back(new boundingbox(vector3d(4500,50,1300)));
+	
+	collidersDetection.push_back(new boundingbox(vector3d(4500,50,1300)));
+	collidersDetection.push_back(new boundingbox(vector3d(4500,50,1700)));
+	
+	collidersDetection.push_back(new boundingbox(vector3d(6200,50,-1000)));
+	collidersDetection.push_back(new boundingbox(vector3d(6200,50,2500)));
+	
+	collidersDetection.push_back(new boundingbox(vector3d(5500,50,2200)));
+	collidersDetection.push_back(new boundingbox(vector3d(-9800,50,2200)));
+	
+	
+	collidersDetection.push_back(new boundingbox(vector3d(4500,50,1700)));
+	collidersDetection.push_back(new boundingbox(vector3d(-9200,50,1700)));
+	
+	collidersDetection.push_back(new boundingbox(vector3d(-9800,50,2200)));
+	collidersDetection.push_back(new boundingbox(vector3d(-9800,50,-100)));
+	
+	collidersDetection.push_back(new boundingbox(vector3d(-9200,50,1700)));
+	collidersDetection.push_back(new boundingbox(vector3d(-9200,50,200)));
+	
+	collidersDetection.push_back(new boundingbox(vector3d(-9800,50,-300)));
+	collidersDetection.push_back(new boundingbox(vector3d(-2500,50,-300)));
+	
+	collidersDetection.push_back(new boundingbox(vector3d(-9200,50,100)));
+	collidersDetection.push_back(new boundingbox(vector3d(-2900,50,100)));
+
+	collidersDetection.push_back(new boundingbox(vector3d(-2900,50,100)));
+	collidersDetection.push_back(new boundingbox(vector3d(-2900,50,1600)));
+	
+	collidersDetection.push_back(new boundingbox(vector3d(-2500,50,-300)));
+	collidersDetection.push_back(new boundingbox(vector3d(-2500,50,1100)));
+	
+	collidersDetection.push_back(new boundingbox(vector3d(-2500,50,1100)));
+	collidersDetection.push_back(new boundingbox(vector3d(-500,50,1100)));
+	
+	collidersDetection.push_back(new boundingbox(vector3d(-2900,50,1300)));
+	collidersDetection.push_back(new boundingbox(vector3d(-500,50,1300)));
+	
 	obj=new objloader();	
 	car=obj->load("data/vehicule/vehicule0.obj",NULL);
-	collision::modifyValueCollision(100);
+	collision::modifyValueCollision(15.0f);
 	actif=true;
 	part.push_back(new particule((int)speed));
 	part.push_back(new particule((int)speed));
+	bb.push_back(new boundingbox(vector3d(180,0,0)));
+	bb.push_back(new boundingbox(vector3d(-140,0,0)));
 	for(int i=0;i<4;i++)
 	 wheel.push_back(new roue("data/vehicule/camionnete_roue.obj"));
 
@@ -99,13 +185,18 @@ for(int i=0;i<part.size();i++)
 	delete part[i];
 	for(int i=0;i<wheel.size();i++)
 	 delete wheel[i];
-
+	for(int i=0;i<bb.size();i++)
+	delete bb[i];
 }
 
-void vehicule::update()
+void vehicule::update(float time)
 {
 
-	control();
+	control(time);
+	
+   
+	bb[0]->setParent(getLocation(),getRotation().y,150);
+	bb[1]->setParent(getLocation(),getRotation().y,-150);
 	
 	for(int i=0;i<wheel.size();i++)
 	 wheel[i]->update();
@@ -113,8 +204,60 @@ void vehicule::update()
 
 }
 
+void vehicule::checkPoints(vector3d loc,vector3d loc2)
+{
+	float dist=sqrt(loc2.x-loc.x)*(loc2.x-loc.x)+(loc2.y-loc.y)*(loc2.y-loc.y)+(loc2.z-loc.z)*(loc2.z-loc.z);
+	
+	if(dist<50000)
+	{
+		points+=5;
+	}
+}
+
+void vehicule::setPoints(int p)
+{
+	points-=p;
+	if(points<0)
+	{
+		points=0;
+	}
+}
+
+int vehicule::getPOINTS()
+{
+	return points;
+}
+
+void vehicule::resetPoints()
+{
+	points=0;
+
+}
+
+void vehicule::setGravity()
+{
+	loc.y-=0.2f;
+	collisionCarAndGround();
+}
 
 
+void vehicule::collisionCarAndGround()
+{
+	if(loc.x>-2500 && loc.x<9000 && loc.z>1000 && loc.z<1300)
+	{
+		loc.y=70;
+	}
+	else
+	{
+		loc.y=110;
+	}
+}
+
+
+void vehicule::limitSpeed(float s)
+{
+	speed=s;
+	}	
 
 void vehicule::update(std::vector<collisionplane>& collplane)
 		{
@@ -147,64 +290,7 @@ printf("maxSpeed: %.2f",maxSpeed);
 					*/
 		}
 	
-	void vehicule::update2(std::vector<collisionplane>& collplane)
-		{
-		
-	
-				vector3d newPos(getLocation());
-			for(int i=0;i<collplane.size();i++)
-				if(collision::sphereplane(newPos,collplane[i].normal,collplane[i].p[0],collplane[i].p[1],collplane[i].p[2],collplane[i].p[3],cs.r))
-				{
-				force_=150;
-					//speed=0.0f;
-				loc.z-=force_;
-			
-		}
-		else
-		{
-			force_=0;
-		}
-		
-		}
-		
-		
-			void vehicule::update3(std::vector<collisionplane>& collplane)
-		{
-		
-	
-				vector3d newPos(getLocation());
-			for(int i=0;i<collplane.size();i++)
-				if(collision::sphereplane(newPos,collplane[i].normal,collplane[i].p[0],collplane[i].p[1],collplane[i].p[2],collplane[i].p[3],cs.r))
-				{
-				force_=150;
-					//speed=0.0f;
-				loc.z+=force_;
-			
-		}
-		else
-		{
-			force_=0;
-		}
-		
-		}
-		
-					void vehicule::update4(std::vector<collisionplane>& collplane)
-		{
-		
-	
-				vector3d newPos(getLocation());
-			for(int i=0;i<collplane.size();i++)
-				if(collision::sphereplane(newPos,collplane[i].normal,collplane[i].p[0],collplane[i].p[1],collplane[i].p[2],collplane[i].p[3],cs.r))
-				{
-		
-					//speed=0.0f;
-				loc=vector3d(-2400,180,1280);
-				a.y=0.0f;
-			
-		}
-	
-		
-		}
+
 		
 		
 		
@@ -223,6 +309,12 @@ vector3d vehicule::getRotation()
 	return  vector3d(a.x,a.y,a.z);
 }
 
+void vehicule::setRotation(vector3d rot)
+{
+	a=rot;
+	angle=0.0f;
+}
+
 void vehicule::setLocationIncX(float y)
 {
 	cs.center.x+=y;
@@ -232,6 +324,7 @@ void vehicule::setLocationIncZ(float y)
 {
 	loc.z+=y;
 }
+
 
 
 void vehicule::draw()
@@ -244,10 +337,12 @@ void vehicule::draw()
 	
 	glCallList(car);
 	
-
+	
 
 	part[0]->draw(-10,(int)speed);
 	part[1]->draw(10,(int)speed);
+
+	
 	glTranslated(32.5,-8,-20);
 	wheel[0]->draw();
 	glTranslated(-60,0,0);
@@ -344,7 +439,7 @@ switch(key)
 	}
 	}
 	
-void vehicule::control()
+void vehicule::control(float time)
 {
 	/*
 	
@@ -532,8 +627,9 @@ void vehicule::control()
 		a.y=angle;
 		
 		//angle=turnSpeed;
-		
-	move();
+	
+	if(time<=0)	
+	 move();
 	
 	
 	
