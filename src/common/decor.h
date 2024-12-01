@@ -1,6 +1,6 @@
 #ifndef DEF_DECOR_H
 #define DEF_DECOR_H
-#include"C:\library\mathsutils\include\vector.h"
+#include"collision/vector.h"
 #include"objloader.hpp"
 
 class decor

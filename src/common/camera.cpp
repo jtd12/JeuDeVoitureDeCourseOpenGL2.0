@@ -38,12 +38,12 @@ vector3d boundingboxCam::getLocation()
 }
 
 void boundingboxCam::setInFrontOfCamera( vector3d cameraPosition,  vector3d cameraOrientation, float distanceFromCamera) {
-    // Placer le cube à une distance fixe devant la caméra
+    // Placer le cube Ã  une distance fixe devant la camÃ©ra
     vector3d normalizedCamOrientation = cameraOrientation;
 	normalizedCamOrientation.normalize();
 	position = cameraPosition + normalizedCamOrientation * distanceFromCamera;	
-    // Garder la même orientation que la caméra
-    rot = atan2(cameraOrientation.z, cameraOrientation.x); // Met à jour l'angle Y du cube pour correspondre à la caméra
+    // Garder la mÃªme orientation que la camÃ©ra
+    rot = atan2(cameraOrientation.z, cameraOrientation.x); // Met Ã  jour l'angle Y du cube pour correspondre Ã  la camÃ©ra
     
 }
 

@@ -103,8 +103,8 @@ vehicule::vehicule(const char* n,collisionsphere ccs, float sprints,float normal
 		speed=normals;
 		angle=0;
 		maxSpeed=rand() % 10 + 12;
-		acc=0.04f;
-		dec=0.05f;
+		acc=0.09f;
+		dec=0.2f;
 		turnSpeed=2.5f;
 		up=0;
 		down=0;
@@ -257,6 +257,7 @@ void vehicule::collisionCarAndGround()
 void vehicule::limitSpeed(float s)
 {
 	speed=s;
+	
 	}	
 
 void vehicule::update(std::vector<collisionplane>& collplane)

@@ -1,8 +1,8 @@
 #ifndef DEF_SKYBOX_H
 #define DEF_SKYBOX_H
-#include"C:\library\mathsutils\include\vector.h"
-#include <gl/gl.h>
-#include<gl/glu.h>
+#include"collision/vector.h"
+#include <GL/gl.h>
+#include<GL/glu.h>
 #include<iostream>
  #ifndef GL_UNSIGNED_SHORT_5_6_5
  #define GL_UNSIGNED_SHORT_5_6_5 0x8363

@@ -1,15 +1,15 @@
 #ifndef DEF_CAR_AI_HPP
 #define DEF_CAR_AI_HPP
 #include"car.h"
-#include"C:\library\mathsutils\include\collisionplane.h"
-#include"C:\library\mathsutils\include\collisionsphere.h"
+#include"collision/collisionplane.h"
+#include"collision/collisionsphere.h"
 #include<vector>
 #include<math.h>
 #include <stdio.h>      /* printf, scanf, puts, NULL */
 #include <stdlib.h>     /* srand, rand */
 #include<string>
-#include"C:\library\mathsutils\include\collision.h"
-#include"C:\library\freeglut\include\GL\freeglut.h"
+#include"collision/collision.h"
+#include<GL/freeglut.h>
 #include <sstream>
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
@@ -92,6 +92,7 @@ class vehiculeAI
 	int nn;
 	int randNumber;
 	int points_;
+	
 	
 };
 

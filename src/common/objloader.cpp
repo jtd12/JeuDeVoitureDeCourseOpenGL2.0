@@ -146,8 +146,7 @@ int objloader::load(const std::string& filename,std::vector<collisionplane>* col
 		if(strcmp(tmp,"collision")==0)
 		{
 			coll=true;
-		}
-		else{
+		}else{
 			coll=false;
 			for(int i=0;i<materials.size();i++)
 			{

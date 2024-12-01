@@ -1,15 +1,15 @@
 #ifndef DEF_PARTICULESYSTEM_H
 #define DEF_PARTICULESYSTEM_H
-#include"C:\library\mathsutils\include\collisionplane.h"
-#include"C:\library\mathsutils\include\collisionsphere.h"
+#include"collision/collisionplane.h"
+#include"collision/collisionsphere.h"
 #include<vector>
 #include<bits/stdc++.h>
 #include<math.h>
 #include <stdio.h>      /* printf, scanf, puts, NULL */
 #include <stdlib.h>     /* srand, rand */
 #include<string>
-#include"C:\library\mathsutils\include\collision.h"
-#include"C:\library\freeglut\include\GL\freeglut.h"
+#include"collision/collision.h"
+#include<GL/freeglut.h>
 #include <sstream>
 
 static float kelvinR[]={1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,0.907,0.827,0.762,0.711,0.668,0.632,0.602};

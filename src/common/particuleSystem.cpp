@@ -1,4 +1,4 @@
-#include"particulesystem.h"
+#include"particuleSystem.h"
 
 
 float MAP(float au32_IN, float au32_INmin, float au32_INmax, float au32_OUTmin, float au32_OUTmax)

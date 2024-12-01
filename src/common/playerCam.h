@@ -3,15 +3,15 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include<vector>
-#include"C:\library\mathsutils\include\vector.h"
-#include"C:\library\mathsutils\include\collision.h"
-#include"C:\library\mathsutils\include\collisionsphere.h"
-#include"C:\library\mathsutils\include\collisionplane.h"
+#include"collision/vector.h"
+#include"collision/collision.h"
+#include"collision/collisionsphere.h"
+#include"collision/collisionplane.h"
 #include"objloader.hpp"
 #include"camera.h"
 #include<cmath>
 #include<iostream>
-#include<C:\library\freeglut\include\GL\freeglut.h>
+#include<GL/freeglut.h>
 #define pi 3.14159265359 // on definit un nombre pi
 
 class playerCam

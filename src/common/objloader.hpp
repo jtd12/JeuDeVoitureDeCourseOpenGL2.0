@@ -9,7 +9,7 @@
 #include <string>
 #include <cstring>
 #include <algorithm>
-#include "C:\library\mathsutils\include\collisionplane.h"
+#include "collision/collisionplane.h"
 #include"texture.hpp"
 #include <cstdlib>
 #include<GL/gl.h>

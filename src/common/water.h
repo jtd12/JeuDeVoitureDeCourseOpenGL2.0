@@ -1,9 +1,9 @@
 #ifndef DEF_WATER_H
 #define DEF_WATER_H
-#include"C:\library\mathsutils\include\vector.h"
+#include"collision/vector.h"
 #include<vector>
-#include <gl/gl.h>
-#include<gl/glu.h>
+#include <GL/gl.h>
+#include<GL/glu.h>
 #include<iostream>
 #include<string>
 

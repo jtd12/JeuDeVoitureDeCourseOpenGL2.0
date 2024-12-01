@@ -1,15 +1,14 @@
 #ifndef DEF_CAMERA_H
 #define DEF_CAMERA_H
-#include"C:\library\mathsutils\include\vector.h"
-#include"C:\library\mathsutils\include\collisionplane.h"
-#include"C:\library\mathsutils\include\collisionsphere.h"
-#include"C:\library\mathsutils\include\collision.h"
+#include"collision/vector.h"
+#include"collision/collisionplane.h"
+#include"collision/collisionsphere.h"
+#include"collision/collision.h"
 #include<vector>
-#include<gl/gl.h>
-#include<gl/glu.h>
+#include <GL/gl.h>
+#include<GL/glu.h>
 #include<stdio.h>
-#include"C:\library\freeglut\include\GL\freeglut.h"
-
+#include<GL/freeglut.h>
 
 class boundingboxCam
 {
@@ -89,6 +88,5 @@ class camera
 		std::vector<boundingboxCam*> collidersDetection;
 			
 	
-
 };
 #endif

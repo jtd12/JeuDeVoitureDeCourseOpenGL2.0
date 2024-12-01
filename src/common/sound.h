@@ -1,12 +1,12 @@
 #ifndef DEF_SOUND_H
 #define DEF_SOUND_H
 #include<fstream>
-#include"C:\library\mathsutils\include\vector.h"
+#include"collision/vector.h"
 #include<iostream>
 #include<cstring>
 #include<vector>
-#include"C:\library\OpenAL 1.1 SDK\include\al.h"
-#include"C:\library\OpenAL 1.1 SDK\include\alc.h"
+#include<AL/al.h>
+#include<AL/alc.h>
 
 using namespace std;
 class sound

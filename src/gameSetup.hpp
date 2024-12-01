@@ -12,13 +12,10 @@
 #include<time.h>
 #include<GL/gl.h>
 #include<GL/glu.h>
-#include<windows.h>
-#include <conio.h>
-#include <mmsystem.h>
-#include"C:\library\freeglut\include\GL\freeglut.h"
+#include<GL/freeglut.h>
 #define R 21
 
-inline float dist(int x1, int y1, int x2, int y2);
+
 
 class setup
 {

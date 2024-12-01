@@ -31,7 +31,7 @@ levels.push_back(new decor("name",map9,mapcp,mapsp));
 
 
 sky=new skybox();
-player=new playerCam("player1",collisionsphere(vector3d(-500,250,1260),75.0),1.2,5.0,0.5);
+player=new playerCam("player1",collisionsphere(vector3d(-500,250,1260),75.0),1.2,10.0,0.25);
 step=0;
 step_cam_follow=0;
 std::vector<unsigned int> anim;
@@ -62,23 +62,20 @@ allCars[4]->carAI.push_back(new vehiculeAI(carAI4_,"voitureAI4",collisionsphere(
 allCars[5]->carAI.push_back(new vehiculeAI(carAI5_,"voitureAI5",collisionsphere(vector3d(-1000,180,1260),70.0),0.02,0.0));
 allCars[6]->carAI.push_back(new vehiculeAI(carAI6_,"voitureAI6",collisionsphere(vector3d(-1500,180,1260),70.0),0.02,0.0));
 
-
 audio=new sound;
 sound1=audio->loadSound("data/audio/vehicule.wav");
-
-PlaySound("data/audio/background.wav", NULL, SND_LOOP |SND_ASYNC);
-
 lighting();
 hudTex=0;
 hudTex2=0;
 hudTex3=0;
 hudTex4=0;
 rotAiguille=0;
-time=80;
+time=20;
 finishedGame=false;
 keyV=false;
 startcameraFollow=false;
 startFreeCamera=true;
+
 }
 
 
@@ -367,7 +364,7 @@ void setup::lighting()
             GLfloat specular_reflexion[] = {0.6f,0.9f,0.9f,1.0f};
             GLubyte shiny_obj = 128;
 
-                        //positionnement de la lumière avec les différents paramètres
+                        //positionnement de la lumi\E8re avec les diff\E9rents param\E8tres
             glEnable(GL_LIGHTING);
             glEnable(GL_LIGHT0);
             glLightfv(GL_LIGHT0,GL_AMBIENT,ambient);
@@ -398,9 +395,18 @@ void setup::updateCamera()
 }
 
 
+
 void setup:: drawText(float x, float y, std::string text) {
     glRasterPos2f(x, y);
-    glutBitmapString(GLUT_BITMAP_8_BY_13, (const unsigned char*)text.c_str());
+    if (glGetError() != GL_NO_ERROR) {
+        std::cerr << "Erreur: Position raster invalide.\n";
+        return;
+    }
+    
+     for (char c : text) {
+        glutBitmapCharacter(GLUT_BITMAP_8_BY_13, c);
+    }
+   // glutBitmapCharacter(GLUT_BITMAP_8_BY_13, (const unsigned char*)text.c_str());
 }
 
 
@@ -512,15 +518,17 @@ void setup::drawHud()
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	gluOrtho2D(0,0,1,0);
+	gluOrtho2D(-1, 1, -1, 1);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-	
 	hud2("data/aiguille.bmp");	
 	hud("data/tableaubord2.bmp");	
 	
-	drawText(-0.6,0.9,"CARPLAYER:");
+	glDisable(GL_DEPTH_TEST);
+	drawText(0.1,0.9,"CARPLAYER:");
+	glEnable(GL_DEPTH_TEST);
+
 	if(allCars[0]->car->getSpeed()>0)
 	 drawText(-0.6,0.8,"VITESSE: "+int2str(allCars[0]->car->getSpeed()*30));
 	else if(allCars[0]->car->getSpeed()<0)
@@ -583,19 +591,18 @@ void setup::collisionCar(vector3d pos,vector3d pos2)
 	
 		 	  if(dist<80)
 		 	  {
-		 	 carMovement(-1.0f);
-		 	 allCars[0]->car->setPoints(1);
+		 	allCars[0]->car->limitSpeed(-5.0f);
+		 	allCars[0]->car->setPoints(1);
 			  }
 		 
 }
 
 void setup::carMovement(float speed)
 {
-	   for(int w=0;w<1;w++)
-	   {
-	      allCars[w]->car->limitSpeed(speed);
-	      allCars[w]->car->setPoints(1);
-	   }
+	 
+	      allCars[0]->car->limitSpeed(speed);
+	      allCars[0]->car->setPoints(1);
+	   
 }
 
 
@@ -615,7 +622,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[1]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 	
@@ -625,7 +632,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[3]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 	
@@ -636,7 +643,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[5]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 	
@@ -646,7 +653,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[7]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 
@@ -656,7 +663,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[9]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 
@@ -666,7 +673,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[11]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 
@@ -675,7 +682,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[13]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 	
@@ -685,7 +692,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[15]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 
@@ -695,7 +702,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[17]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 
@@ -706,7 +713,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[19]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 
@@ -716,7 +723,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[21]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 
@@ -726,7 +733,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[23]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 
@@ -736,7 +743,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[25]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 
@@ -746,7 +753,7 @@ void setup::collisionCameraAndWall()
 	player->cam.collidersDetection[27]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
-         cameraMovement(-40.8f);
+         cameraMovement(-20.8f);
 
 	}
 	else
@@ -1101,8 +1108,6 @@ carMovement(4.0f);
 	
 }
 
-
-
 inline float dist(int x1, int y1, int x2, int y2)
 {
     // Calculating distance
@@ -1142,17 +1147,6 @@ void setup::update()
     deltaTime = clock() - oldTime;
 	fps = (1.0 / deltaTime) * 1000;
 	oldTime = clock();
-
-//	printf("v1: %.2f\n",allCars[1]->carAI[0]->getSpeed());
-//	printf("v2: %.2f\n",allCars[2]->carAI[0]->getSpeed());
-	
-	/*
-	if(player->cam.getActif()==false && car->getActif())
-	{
-	 player->cam.setLocation(car->getLocation());
-	 car->control();
-	
-	}*/
 	
 	resetCar(startFreeCamera);
 	
@@ -1236,7 +1230,6 @@ void setup::update()
 
 	
 	fog();
-	
 }
 
 
@@ -1283,7 +1276,8 @@ void setup::draw()
 	  allCars[0]->car->collidersDetection[i]->draw();
 	  
 	glPopMatrix();
+	
+	
 	drawHud();
-
 
 }
