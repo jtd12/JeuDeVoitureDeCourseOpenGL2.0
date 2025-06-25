@@ -159,8 +159,8 @@ vehicule::vehicule(const char* n,collisionsphere ccs, float sprints,float normal
 	collidersDetection.push_back(new boundingbox(vector3d(-2500,50,1100)));
 	collidersDetection.push_back(new boundingbox(vector3d(-500,50,1100)));
 	
-	collidersDetection.push_back(new boundingbox(vector3d(-2900,50,1300)));
-	collidersDetection.push_back(new boundingbox(vector3d(-500,50,1300)));
+//	collidersDetection.push_back(new boundingbox(vector3d(-2900,50,1300)));
+//	collidersDetection.push_back(new boundingbox(vector3d(-500,50,1300)));
 	
 	obj=new objloader();	
 	car=obj->load("data/vehicule/vehicule0.obj",NULL);

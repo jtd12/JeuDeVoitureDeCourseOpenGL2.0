@@ -741,14 +741,14 @@ void setup::collisionCameraAndWall()
 	}
 
 	
-	else if(linePointDetection(player->cam.collidersDetection[26]->getLocation().x,
+/*	else if(linePointDetection(player->cam.collidersDetection[26]->getLocation().x,
 	player->cam.collidersDetection[26]->getLocation().z,player->cam.collidersDetection[27]->getLocation().x,
 	player->cam.collidersDetection[27]->getLocation().z,player->cam.bb->getLocation().x,player->cam.bb->getLocation().z))
     {
     //	allCars[w]->car->setLocationIncZ(15.5f);
          cameraMovement(-40.8f);
 
-	}
+	}*/
 	else
 	{
 		   cameraMovement(1.0f);
@@ -1076,7 +1076,7 @@ carMovement(4.0f);
 
 	}
 	
-	
+	/*
 	   for(int w=0;w<1;w++)
     if(linePointDetection(allCars[w]->car->collidersDetection[26]->getLocation().x,
 	allCars[w]->car->collidersDetection[26]->getLocation().z,allCars[w]->car->collidersDetection[27]->getLocation().x,
@@ -1096,7 +1096,7 @@ carMovement(4.0f);
       carMovement(4.0f);
 
 	}
-
+*/
 	
 	
 }

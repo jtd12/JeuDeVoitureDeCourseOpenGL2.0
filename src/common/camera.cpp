@@ -108,8 +108,8 @@ camera::camera()
 	collidersDetection.push_back(new boundingboxCam  (vector3d(-2500,50,1100)));
 	collidersDetection.push_back(new boundingboxCam  (vector3d(-500,50,1100)));
 	
-	collidersDetection.push_back(new boundingboxCam  (vector3d(-2900,50,1300)));
-	collidersDetection.push_back(new boundingboxCam  (vector3d(-500,50,1300)));
+//	collidersDetection.push_back(new boundingboxCam  (vector3d(-2900,50,1300)));
+//	collidersDetection.push_back(new boundingboxCam  (vector3d(-500,50,1300)));
 }
 camera::~camera()
 {
